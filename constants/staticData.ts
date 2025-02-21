@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+// import dayjs from "dayjs";
 export const popularCitiesList = [
   {
     id: "clxy7z8qt00000clg4x71e8i8",
@@ -43,9 +43,9 @@ export const popularCitiesList = [
 ];
 
 
-const getDaysLeft = (auctionDate: string) => {
-    const today = dayjs();
-    const auctionDay = dayjs(auctionDate);
-    const daysLeft = auctionDay.diff(today, "day");
-    return daysLeft > 0 ? `${daysLeft} days left` : "Auction ended";
-  };
+// const getDaysLeft = (auctionDate: string) => {
+//     const today = dayjs();
+//     const auctionDay = dayjs(auctionDate);
+//     const daysLeft = auctionDay.diff(today, "day");
+//     return daysLeft > 0 ? `${daysLeft} days left` : "Auction ended";
+//   };

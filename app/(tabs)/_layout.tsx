@@ -1,4 +1,4 @@
-import { Link, Tabs } from "expo-router";
+import { Link, Tabs, useRouter } from "expo-router";
 import { Button, H4, H5, H6, SizableText, useTheme } from "tamagui";
 import {
   Atom,
@@ -9,8 +9,12 @@ import {
 } from "@tamagui/lucide-icons";
 import { APP_COLOR } from "constants/Colors";
 import { Image } from "react-native";
+import { useUser } from "context/UserContextProvider";
 
 export default function TabLayout() {
+  const { user } = useUser();
+  const router = useRouter();
+
   const theme = useTheme();
 
   return (
@@ -43,8 +47,11 @@ export default function TabLayout() {
                 color: "white",
                 marginRight: 5,
               }}
+              onPress={() =>
+                user.isLogin ? router.push("/profile") : router.push("/login")
+              }
             >
-              Demo User
+              {user.isLogin ? user.name : "Login/Signup"}
               {/* <CircleUser color={"white" as any} /> */}
             </SizableText>
           ),
@@ -70,7 +77,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: "Search",
+          title: "Advance Search",
           tabBarIcon: ({ color }) => <Search color={color as any} />,
         }}
       />

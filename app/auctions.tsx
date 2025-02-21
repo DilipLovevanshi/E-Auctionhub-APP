@@ -2,7 +2,7 @@ import { APP_COLOR } from "constants/Colors";
 import { useEffect, useState } from "react";
 import { View, Text, Image } from "tamagui";
 import { TouchableOpacity, StyleSheet, FlatList } from "react-native";
-import dayjs from "dayjs";
+// import dayjs from "dayjs";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { BACKEND_API } from "constants/api";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -105,13 +105,15 @@ export default function AuctionScreen() {
           <Text style={styles.date}>
             <Fontisto name="date" size={14} color="black" />{" "}
             <Text style={{ fontWeight: "bold" }}>
-              {dayjs(auction.startDate).format("MMM DD, YYYY")}
+              {/* {dayjs(auction.startDate).format("MMM DD, YYYY")} */}
+              {auction.startDate}
             </Text>
           </Text>
           {auction.applicationDeadLine && (
             <Text style={styles.deadline}>
               ⏳ Deadline Date:{" "}
-              {dayjs(auction.applicationDeadLine).format("MMM DD, YYYY")}
+              {/* {dayjs(auction.applicationDeadLine).format("MMM DD, YYYY")} */}
+              {auction.applicationDeadLine}
             </Text>
           )}
         </View>
