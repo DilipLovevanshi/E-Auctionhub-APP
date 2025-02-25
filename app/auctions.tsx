@@ -7,6 +7,7 @@ import {
   FlatList,
   Dimensions,
   Share,
+  Modal,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { BACKEND_API } from "constants/api";
@@ -15,14 +16,17 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Fontisto from "@expo/vector-icons/Fontisto";
 import LoaderSkelton from "components/LoaderSkelton";
 import RenderFooter from "components/NoAuctionFoundCard";
-import { formateDate } from "constants/staticData";
+import { formateDate, sortList } from "constants/staticData";
 import { APP_LINK } from "constants/constant";
+import { Dropdown } from "react-native-element-dropdown";
+import { AntDesign } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width / 2 - 18;
 
 export default function AuctionScreen() {
-  const { cityId, assetTypeId } = useLocalSearchParams() as any;
+  const { cityId, assetTypeId, bankId, minPrice, maxPrice } =
+    useLocalSearchParams() as any;
   const [loading, setLoading] = useState(false);
   const [auctions, setAuctions] = useState([]);
   const [page, setPage] = useState(1);
@@ -30,20 +34,25 @@ export default function AuctionScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const LIMIT = 10;
   const router = useRouter();
-
+  const [totalAuction, setTotalAuction] = useState(0);
+  const [sort, setSort] = useState("search");
+  const [isModalVisible, setModalVisible] = useState(false);
   const fetchAuctions = async (pageNumber = 1, isRefreshing = false) => {
     if (loading) return;
     try {
       setLoading(true);
-      const URL = `${BACKEND_API}auction/search?assetTypeId=${assetTypeId}&cityId=${cityId}&page=${pageNumber}&limit=${LIMIT}`;
+      const URL = `${BACKEND_API}auction/${sort}?assetTypeId=${assetTypeId}&bankId=${bankId}&cityId=${cityId}&minResPrice=${minPrice}&maxResPrice=${maxPrice}&page=${pageNumber}&limit=${LIMIT}`;
       const response = await fetch(URL);
       const data = await response.json();
+
+      console.log(data, "auction data");
 
       if (data?.statusCode === 200) {
         setAuctions((prev) =>
           isRefreshing ? data?.data : [...prev, ...data?.data]
         );
         setLastPage(data?.lastPage);
+        setTotalAuction(data.totalAuctions);
       }
     } catch (error) {
       console.log("error", error);
@@ -55,7 +64,7 @@ export default function AuctionScreen() {
 
   useEffect(() => {
     fetchAuctions(1, true);
-  }, [cityId, assetTypeId]);
+  }, [cityId, assetTypeId, bankId, minPrice, maxPrice, sort]);
 
   const loadMore = () => {
     if (!loading && page < lastPage) {
@@ -163,6 +172,58 @@ export default function AuctionScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.totalAuctions}>
+          Total Auctions Found:{" "}
+          <Text style={{ color: "#007bff" }}>{totalAuction}</Text>
+        </Text>
+        <TouchableOpacity
+          style={styles.dropdown}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text>Sort By:</Text>
+          <AntDesign name="down" size={16} color="black" />
+        </TouchableOpacity>
+      </View>
+
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View
+          style={styles.modalOverlay}
+          onPress={() => {
+            setModalVisible(false);
+          }}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Sort By</Text>
+            <FlatList
+              data={sortList}
+              keyExtractor={(item, index) => `${item.value}-${index}`}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.modalItem}
+                  onPress={() => {
+                    setSort(item.value);
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.itemText}>{item.label}</Text>
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <FlatList
         data={auctions}
         keyExtractor={(item, index) => `${item.id}-${index}`}
@@ -203,7 +264,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: "100%",
-    height: 80, // Reduced height
+    height: 80,
     borderRadius: 10,
     overflow: "hidden",
     position: "relative",
@@ -271,5 +332,65 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  totalAuctions: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  dropdown: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    width: 120,
+    justifyContent: "space-between",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  itemText: {
+    fontSize: 16,
+  },
+  closeButton: {
+    padding: 15,
+    alignItems: "center",
+    backgroundColor: "#007bff",
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });

@@ -125,7 +125,7 @@ const ProfileScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => console.log("Navigate to TermsConditions")}
+          onPress={() => router.push("/termsAndConditions")}
         >
           <MaterialIcons
             name="description"
@@ -137,7 +137,7 @@ const ProfileScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => console.log("Navigate to PrivacyPolicy")}
+          onPress={() => router.push("/privacyAndPolicy")}
         >
           <MaterialIcons
             name="shield"
